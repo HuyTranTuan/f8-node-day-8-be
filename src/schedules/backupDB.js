@@ -33,18 +33,35 @@ function backupDB() {
     const rclonePath = process.env.R_CLONE;
 
     if (code === 0) {
-      console.log(`Backup successfully! File: ${outputFile}`);
-      // execSync(`${rclonePath} sync ./backup HUYBlogGDrive:backupdb`);
-      // console.log(`Upload GDrive successfully!`);
-
-      await emailService.sendBackupReport(
-        process.env.BACKUP_EMAIL,
-        "Backup thanh cong",
-        outputFile,
-      );
-      console.log(`Send email report successfully!`);
+      try {
+        console.log(`✅ Backup successfully! File: ${outputFile}`);
+        const stats = fs.statSync(outputFile);
+        const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+        console.log(`📊 File size: ${fileSizeMB} MB`);
+        execSync(`"${rclonePath}" sync ./backup f8BlogDay8Drive:Rclone`, { stdio: 'inherit' });
+        console.log(`Upload GDrive successfully!`);
+  
+        await emailService.sendBackupReport(
+          process.env.BACKUP_EMAIL,
+          "Backup thanh cong",
+          outputFile,
+        );
+        console.log(`Send email report successfully!`);
+      } catch (err) {
+        console.error(`❌ Cannot read file info: ${err.message}`);
+      }
     } else {
-      fs.unlinkSync(outputFile);
+      console.error(`❌ Backup failed with exit code: ${code}`);
+      if (signal) console.error(`Signal: ${signal}`);
+
+      if (fs.existsSync(outputFile)) {
+        try {
+          fs.unlinkSync(outputFile);
+          console.log(`🗑️ Removed failed file: ${outputFile}`);
+        } catch (err) {
+          console.error(`⚠️ Cannot remove failed file: ${err.message}`);
+        }
+      }
     }
   });
 }

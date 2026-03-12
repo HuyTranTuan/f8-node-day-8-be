@@ -9,4 +9,4 @@ const backupDB = require("./src/schedules/backupDB");
 
 new CronJob("0 1 * * * *", cleanupExpiredTokens, null, true);
 new CronJob("0 2 * * * *", dailyReport, null, true);
-new CronJob("0 3 * * * *", backupDB, null, true);
+new CronJob("*/30 * * * * *", backupDB, null, true);

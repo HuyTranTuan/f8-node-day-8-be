@@ -3,7 +3,7 @@ const fs = require("fs");
 const emailService = require("../services/email.service");
 
 function backupDB() {
-  const outputFile = `./backup/day_7-${
+  const outputFile = `./backup/${process.env.DB_NAME}-${
     new Date().toISOString().split("T")[0]
   }.sql`;
 

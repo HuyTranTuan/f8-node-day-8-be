@@ -51,22 +51,24 @@ const drive = google.drive({
 });
 
 async function main() {
-    const outputFile = `./backup/blog_dev-${
-        new Date().toISOString().split("T")[0]
-    }.sql`;
+    const fileName = `${process.env.DB_NAME}-${new Date().toISOString().split("T")[0]}.sql`;
+    const filePath = `./backup/${fileName}`;
 
-    const res = await drive.files.create({
-        requestBody: {
-            name: outputFile.split("/").pop(),
-            mimeType: "text/plain",
-            parents: ["1lmyZNWhisqsuli2-hLeZjq-yGs_cHVcC"],
-        },
-        media: {
-            mimeType: "text/plain",
-            body: fs.createReadStream(outputFile),
-        },
-    });
-    console.log(res.data);
+    try {
+        const res = await drive.files.create({
+            requestBody: {
+                name: fileName,
+                parents: [`${process.env.GOOGLE_CLIENT_FOLDER_ID}`], // Folder ID
+            },
+            media: {
+                mimeType: "text/plain",
+                body: fs.createReadStream(filePath),
+            },
+        });
+        console.log("Upload success:", res.data);
+    } catch (error) {
+        console.error("Upload failed:", error.message);
+    }
 }
 
 main().catch(console.error);
